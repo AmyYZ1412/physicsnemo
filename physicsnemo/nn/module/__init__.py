@@ -62,6 +62,7 @@ from .hpx import (
 )
 from .kan_layers import KolmogorovArnoldNetwork
 from .mlp_layers import Mlp
+from .ozaki_linear import OzakiLinear, convert_linear_to_ozaki, ozaki_matmul
 from .resample_layers import (
     DownSample2D,
     DownSample3D,
