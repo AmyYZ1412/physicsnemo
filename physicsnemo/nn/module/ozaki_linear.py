@@ -1,6 +1,18 @@
-# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-FileCopyrightText: Copyright (c) 2023 - 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """Ozaki Scheme II / GEMMul8 FP64-emulated linear layers.
 
@@ -86,7 +98,9 @@ def _check_fp64_cuda(name: str, tensor: torch.Tensor) -> None:
         raise TypeError(f"{name} must be a CUDA tensor")
 
 
-def _check_triple_limb(name: str, tensor: torch.Tensor, ref: torch.Tensor | None = None) -> None:
+def _check_triple_limb(
+    name: str, tensor: torch.Tensor, ref: torch.Tensor | None = None
+) -> None:
     if tensor.dtype != torch.float32:
         raise TypeError(f"{name} must be a torch.float32 tensor")
     if ref is not None:
@@ -96,7 +110,9 @@ def _check_triple_limb(name: str, tensor: torch.Tensor, ref: torch.Tensor | None
             raise ValueError(f"{name} shape must match the reference limb")
 
 
-def split_float64_to_triple_float32(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def split_float64_to_triple_float32(
+    x: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Split an FP64 tensor into three FP32 residual limbs for Ozaki backward."""
 
     if x.dtype != torch.float64:
@@ -189,7 +205,9 @@ def ozaki_linear_forward_triple(
     )
 
 
-def _triple_matmul(a_hi, a_mid, a_lo, b_hi, b_mid, b_lo, *, num_moduli=15, fastmode=False):
+def _triple_matmul(
+    a_hi, a_mid, a_lo, b_hi, b_mid, b_lo, *, num_moduli=15, fastmode=False
+):
     return ozaki_linear_forward_triple(
         a_hi,
         a_mid,
@@ -262,7 +280,9 @@ def _grad_output_or_zero(grad: torch.Tensor | None, like: torch.Tensor) -> torch
     return grad.to(torch.float32).contiguous()
 
 
-def _zero_triple_like(like_hi: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def _zero_triple_like(
+    like_hi: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     zero = torch.zeros_like(like_hi)
     return zero, zero, zero
 
@@ -276,7 +296,9 @@ def _add_triple(
     return tuple(a + b for a, b in zip(accum, value, strict=True))
 
 
-def _two_sum_float32(a: torch.Tensor, b: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+def _two_sum_float32(
+    a: torch.Tensor, b: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor]:
     summation = a + b
     correction = (a - (summation - b)) + (b - (summation - a))
     return summation, correction
@@ -560,7 +582,8 @@ class _OzakiLinearBackwardTripleFunction(torch.autograd.Function):
                 fastmode=ctx.fastmode,
             )
             d_input = tuple(
-                limb.reshape(*leading_shape, weight_hi.shape[1]) for limb in d_input_flat
+                limb.reshape(*leading_shape, weight_hi.shape[1])
+                for limb in d_input_flat
             )
             d_grad_from_weight = _triple_matmul(
                 *flat_input,
@@ -598,7 +621,10 @@ class _OzakiLinearBackwardTripleFunction(torch.autograd.Function):
         if ctx.needs_grad_bias_value and has_grad_grad_bias:
             d_grad = _add_triple(
                 d_grad,
-                tuple(limb.expand_as(flat_grad[0]).reshape_as(grad_hi) for limb in flat_grad_grad_bias),
+                tuple(
+                    limb.expand_as(flat_grad[0]).reshape_as(grad_hi)
+                    for limb in flat_grad_grad_bias
+                ),
             )
 
         if d_input is None:
@@ -674,7 +700,9 @@ class _OzakiMatmul(torch.autograd.Function):
         return grad_a, grad_b, None, None
 
 
-def ozaki_matmul(a: torch.Tensor, b: torch.Tensor, num_moduli: int = 15, fastmode: bool = False):
+def ozaki_matmul(
+    a: torch.Tensor, b: torch.Tensor, num_moduli: int = 15, fastmode: bool = False
+):
     """Compute ``a @ b`` with the Ozaki/GEMMul8 FP64-emulated GEMM path."""
 
     _check_fp64_cuda("a", a)
@@ -765,7 +793,9 @@ class _OzakiLinear(torch.autograd.Function):
             else None
         )
         grad_bias = (
-            reconstruct_triple_float32_to_float64(*grad_bias_limbs).reshape(ctx.bias_shape)
+            reconstruct_triple_float32_to_float64(*grad_bias_limbs).reshape(
+                ctx.bias_shape
+            )
             if ctx.has_bias and ctx.needs_input_grad[2]
             else None
         )
@@ -811,7 +841,9 @@ class OzakiLinear(nn.Module):
         self.out_features = int(out_features)
         self.num_moduli = int(num_moduli)
         self.fastmode = bool(fastmode)
-        self.weight = nn.Parameter(torch.empty(out_features, in_features, dtype=torch.float64))
+        self.weight = nn.Parameter(
+            torch.empty(out_features, in_features, dtype=torch.float64)
+        )
         if bias:
             self.bias = nn.Parameter(torch.empty(out_features, dtype=torch.float64))
         else:
@@ -904,7 +936,9 @@ def convert_linear_to_ozaki(
             setattr(
                 module,
                 name,
-                OzakiLinear.from_linear(child, num_moduli=num_moduli, fastmode=fastmode),
+                OzakiLinear.from_linear(
+                    child, num_moduli=num_moduli, fastmode=fastmode
+                ),
             )
         else:
             convert_linear_to_ozaki(

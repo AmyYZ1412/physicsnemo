@@ -1,3 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023 - 2026 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-FileCopyrightText: All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Convection PINN comparison for native FP32, native FP64, and Ozaki FP64.
 
 The Ozaki backend only replaces ``nn.Linear`` GEMMs in the PINN MLP. Activation,
@@ -59,7 +75,9 @@ def initial_loss(model: nn.Module, x: torch.Tensor, speed: float):
     return (model(t0, x) - exact_solution(t0, x, speed)).square().mean()
 
 
-def relative_l2(model: nn.Module, device: torch.device, dtype: torch.dtype, speed: float):
+def relative_l2(
+    model: nn.Module, device: torch.device, dtype: torch.dtype, speed: float
+):
     n = 128
     t = torch.linspace(0.0, 1.0, n, device=device, dtype=dtype).reshape(-1, 1)
     x = torch.linspace(0.0, 2.0 * math.pi, n, device=device, dtype=dtype).reshape(-1, 1)
@@ -73,10 +91,14 @@ def relative_l2(model: nn.Module, device: torch.device, dtype: torch.dtype, spee
 
 
 def build_model(args, device: torch.device, dtype: torch.dtype) -> nn.Module:
-    model = MLP(hidden_dim=args.hidden_dim, num_layers=args.num_layers).to(device=device, dtype=dtype)
+    model = MLP(hidden_dim=args.hidden_dim, num_layers=args.num_layers).to(
+        device=device, dtype=dtype
+    )
     if args.backend == "ozaki_fp64":
         if dtype is not torch.float64:
-            raise ValueError("ozaki_fp64 backend requires --backend ozaki_fp64 with float64 tensors")
+            raise ValueError(
+                "ozaki_fp64 backend requires --backend ozaki_fp64 with float64 tensors"
+            )
         model = convert_linear_to_ozaki(
             model,
             num_moduli=args.num_moduli,
@@ -88,7 +110,11 @@ def build_model(args, device: torch.device, dtype: torch.dtype) -> nn.Module:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--backend", choices=["native_fp32", "native_fp64", "ozaki_fp64"], default="native_fp64")
+    parser.add_argument(
+        "--backend",
+        choices=["native_fp32", "native_fp64", "ozaki_fp64"],
+        default="native_fp64",
+    )
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=2048)
     parser.add_argument("--hidden-dim", type=int, default=64)
@@ -98,7 +124,9 @@ def main():
     parser.add_argument("--num-moduli", type=int, default=15)
     parser.add_argument("--fastmode", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--out", type=Path, default=Path("ozaki_fp64_convection_metrics.json"))
+    parser.add_argument(
+        "--out", type=Path, default=Path("ozaki_fp64_convection_metrics.json")
+    )
     args = parser.parse_args()
 
     if args.backend == "ozaki_fp64" and not torch.cuda.is_available():

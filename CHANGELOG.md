@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Optional FP64 Ozaki Scheme II / GEMMul8 linear backend for PINN workloads,
+  including a converter for `torch.nn.Linear` modules and a convection example.
 - Refactored diffusion preconditioners in
   `physicsnemo.diffusion.preconditioners` relying on a new abstract base class
   `BaseAffinePreconditioner` for preconditioning schemes using affine
