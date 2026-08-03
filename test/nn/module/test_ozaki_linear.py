@@ -20,6 +20,16 @@ import torch.nn as nn
 
 from physicsnemo.models.mlp import FullyConnected
 from physicsnemo.nn import OzakiLinear, convert_linear_to_ozaki
+from physicsnemo.nn.module.ozaki_linear import _extension_backend_name
+from physicsnemo.nn.module.ozaki_schemes import (
+    MXFP8_KARATSUBA_GEMMS_PER_MODULUS,
+    NVFP4_GEMM_SCHEDULE,
+    canonical_ozaki_backend,
+    reconstruct_mxfp8_karatsuba_product,
+    reconstruct_nvfp4_digit_product,
+    split_mxfp8_digits,
+    split_nvfp4_digits,
+)
 
 
 def test_convert_linear_to_ozaki_replaces_nested_linear_layers():
@@ -36,6 +46,44 @@ def test_convert_linear_to_ozaki_replaces_nested_linear_layers():
     assert isinstance(model[0], nn.Linear)
     assert converted[0].weight.dtype == torch.float64
     assert "num_moduli=15" in converted[0].extra_repr()
+
+
+def test_convert_linear_to_ozaki_accepts_backend_selector():
+    model = nn.Sequential(nn.Linear(2, 8), nn.Linear(8, 1)).double()
+
+    converted = convert_linear_to_ozaki(model, backend="fp8", inplace=False)
+
+    assert converted[0].backend == "fp8"
+    assert converted[1].backend == "fp8"
+    assert "backend='fp8'" in converted[0].extra_repr()
+
+
+def test_ozaki_backend_aliases_and_nvfp4_digit_schedule():
+    assert canonical_ozaki_backend("mxfp8_ozaki2") == "mxfp8"
+    with pytest.raises(RuntimeError, match="not a GEMMul8 extension backend"):
+        _extension_backend_name("mxfp8")
+    with pytest.raises(RuntimeError, match="not a GEMMul8 extension backend"):
+        _extension_backend_name("nvfp4")
+
+    assert split_nvfp4_digits(0) == (0, 0, 0)
+    assert split_nvfp4_digits(364) == (4, 4, 4)
+    assert split_nvfp4_digits(-364) == (-4, -4, -4)
+    assert len(NVFP4_GEMM_SCHEDULE) == 9
+
+    gemm_values = [0] * 9
+    gemm_values[-1] = 7
+    assert reconstruct_nvfp4_digit_product(gemm_values) == 7
+
+    assert MXFP8_KARATSUBA_GEMMS_PER_MODULUS == 3
+    assert reconstruct_mxfp8_karatsuba_product(7, 11, 31) == (
+        16 * 16 * 7 + 16 * (31 - 7 - 11) + 11
+    )
+    for value in range(-255, 256):
+        lo, hi = split_mxfp8_digits(value)
+        assert lo + 16 * hi == value
+        assert -16 <= lo <= 16
+        assert -16 <= hi <= 16
+        assert -16 <= lo + hi <= 16
 
 
 def test_convert_linear_to_ozaki_replaces_physicsnemo_fully_connected_layers():

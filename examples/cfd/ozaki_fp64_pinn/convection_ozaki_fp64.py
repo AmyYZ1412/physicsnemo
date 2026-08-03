@@ -103,6 +103,7 @@ def build_model(args, device: torch.device, dtype: torch.dtype) -> nn.Module:
             model,
             num_moduli=args.num_moduli,
             fastmode=args.fastmode,
+            backend=args.ozaki_backend,
             inplace=True,
         )
     return model
@@ -123,6 +124,12 @@ def main():
     parser.add_argument("--speed", type=float, default=1.0)
     parser.add_argument("--num-moduli", type=int, default=15)
     parser.add_argument("--fastmode", action="store_true")
+    parser.add_argument(
+        "--ozaki-backend",
+        choices=["int8", "fp8", "mxfp8", "nvfp4"],
+        default="int8",
+        help="Low-precision Ozaki residue backend used when --backend ozaki_fp64.",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
         "--out", type=Path, default=Path("ozaki_fp64_convection_metrics.json")
@@ -164,8 +171,12 @@ def main():
 
     elapsed = time.perf_counter() - start
     rel_l2 = relative_l2(model, device, dtype, args.speed)
+    linear_gemm_backend = (
+        args.ozaki_backend if args.backend == "ozaki_fp64" else args.backend
+    )
     metrics = {
         "backend": args.backend,
+        "linear_gemm_backend": linear_gemm_backend,
         "dtype": str(dtype).replace("torch.", ""),
         "steps": args.steps,
         "elapsed_sec": elapsed,

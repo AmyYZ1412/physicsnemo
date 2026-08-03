@@ -82,4 +82,23 @@ std::vector<double> gemmLt<double, Backend::INT8>(GEMMLt_ARGS(double)) {
     return real::gemm<double, Backend::INT8>(GEMMLt_CALL_ARGS);
 }
 
+template <>
+size_t workSize<false, Backend::FP8>(
+    size_t m,
+    size_t n,
+    size_t k,
+    unsigned num_moduli,
+    bool enable_skip_scalA,
+    bool enable_skip_scalB,
+    size_t *workSizeA,
+    size_t *workSizeB) {
+    return real::workSize<Backend::FP8>(
+        m, n, k, num_moduli, enable_skip_scalA, enable_skip_scalB, workSizeA, workSizeB);
+}
+
+template <>
+std::vector<double> gemmLt<double, Backend::FP8>(GEMMLt_ARGS(double)) {
+    return real::gemm<double, Backend::FP8>(GEMMLt_CALL_ARGS);
+}
+
 } // namespace gemmul8
