@@ -123,6 +123,7 @@ from .module.hpx import (
 )
 from .module.kan_layers import KolmogorovArnoldNetwork
 from .module.mlp_layers import Mlp
+from .module.ozaki_linear import OzakiLinear, convert_linear_to_ozaki, ozaki_matmul
 from .module.pade import Pade
 from .module.point_transformer_attention import (
     AdaLNResidualMLP,

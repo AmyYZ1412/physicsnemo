@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Adds an optional FP64 Ozaki Scheme II linear backend for PINN workloads,
+  with INT8, FP8, MXFP8, and NVFP4 GEMM implementations, backend profiling,
+  and a converter for `torch.nn.Linear` modules.
 - Adds `physicsnemo.nn.shrink_and_perturb_`, an in-place shrink-and-perturb
   weight re-initialization for warm-starting from pretrained weights.
 - Adds dimension-generic volume mesh generation for implicit domains to
