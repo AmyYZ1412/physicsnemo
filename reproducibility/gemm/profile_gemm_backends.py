@@ -29,7 +29,7 @@ from typing import Any, Callable
 import torch
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKENDS = ("fp64", "int8", "fp8", "mxfp8", "nvfp4")
 
 

@@ -32,7 +32,6 @@ OzakiBackendName = Literal["int8", "fp8", "mxfp8", "nvfp4"]
 BACKEND_ALIASES = {
     "int8": "int8",
     "int8_ozaki2": "int8",
-    "ozaki_fp64": "int8",
     "fp8": "fp8",
     "fp8_ozaki2": "fp8",
     "mxfp8": "mxfp8",
@@ -110,9 +109,9 @@ def split_nvfp4_digits(value: int) -> tuple[int, int, int]:
 def split_mxfp8_digits(value: int) -> tuple[int, int]:
     """Split a centered residue into d0 + 16*d1 for the MXFP8 scheme.
 
-    The Week 9 MXFP8 residue backend uses Karatsuba, so the FP8 GEMMs must see
-    exact integer inputs for d0, d1, and d0 + d1. The representation below keeps
-    all three in [-16, 16].
+    The MXFP8 residue backend uses Karatsuba, so the FP8 GEMMs must see exact
+    integer inputs for d0, d1, and d0 + d1. The representation below keeps all
+    three in [-16, 16].
     """
 
     if value < -272 or value > 272:
@@ -150,7 +149,7 @@ def reconstruct_mxfp8_karatsuba_product(
     lo_lo: int,
     sum_sum: int,
 ) -> int:
-    """Reconstruct one MXFP8 radix-16 product from Week 9 Karatsuba outputs."""
+    """Reconstruct one MXFP8 radix-16 product from Karatsuba outputs."""
 
     cross = int(sum_sum) - int(hi_hi) - int(lo_lo)
     return (

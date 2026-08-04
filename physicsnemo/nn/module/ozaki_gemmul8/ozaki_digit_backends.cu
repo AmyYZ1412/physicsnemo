@@ -5,7 +5,7 @@
 // preallocated buffers, then a single fused reconstruction+CRT kernel —
 // instead of dozens of aten-level passes per modulus.
 //
-// Pipeline (identical algorithm to the Week 9 reference and to v1):
+// Pipeline (identical algorithm to the exact-integer reference and to v1):
 //
 //   FP64 inputs
 //   -> per-row / per-column power-of-2 scaling shifts (Ozaki-II accurate mode)

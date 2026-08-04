@@ -47,7 +47,7 @@ _EXECUTABLE_GEMMUL8_BACKENDS = EXECUTABLE_GEMMUL8_BACKENDS
 
 # Backends executed by the C++ digit-decomposition pipeline in
 # ozaki_gemmul8/ozaki_digit_backends.cu (real MXFP8/NVFP4 hardware GEMMs via
-# torch _scaled_mm_v2), implementing the Week 9 reference algorithm.
+# torch _scaled_mm_v2), implementing the reference digit-decomposition algorithm.
 _EXECUTABLE_DIGIT_BACKENDS = ("mxfp8", "nvfp4")
 
 # Naming convention:
@@ -98,7 +98,7 @@ def _digit_crt_basis(
     Computed with arbitrary-precision integers, then each value is split into
     two float64 parts (hi + lo, exact) so the C++ side can reconstruct with
     double-double arithmetic at FP64-grade accuracy. Mathematically the same
-    signed CRT as the Week 9 exact-integer reference.
+    signed CRT as the exact-integer reference algorithm.
     """
 
     moduli = _digit_backend_moduli(backend, num_moduli)

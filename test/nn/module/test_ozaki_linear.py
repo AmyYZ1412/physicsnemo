@@ -60,6 +60,8 @@ def test_convert_linear_to_ozaki_accepts_backend_selector():
 
 def test_ozaki_backend_aliases_and_nvfp4_digit_schedule():
     assert canonical_ozaki_backend("mxfp8_ozaki2") == "mxfp8"
+    with pytest.raises(ValueError, match="unknown Ozaki backend"):
+        canonical_ozaki_backend("ozaki_fp64")
     with pytest.raises(RuntimeError, match="not a GEMMul8 extension backend"):
         _extension_backend_name("mxfp8")
     with pytest.raises(RuntimeError, match="not a GEMMul8 extension backend"):

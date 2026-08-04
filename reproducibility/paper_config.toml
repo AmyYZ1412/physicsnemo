@@ -1,0 +1,70 @@
+[gemm]
+backends = ["fp64", "int8", "fp8", "mxfp8", "nvfp4"]
+shapes = [
+  "40401x2x512",
+  "40401x512x512",
+  "40401x512x1",
+  "512x40401x512",
+]
+num_moduli = 15
+fastmode = false
+warmup = 3
+repeat = 10
+seed = 0
+scale = 0.25
+rtol = 1.0e-10
+atol = 1.0e-10
+digit_streams = 4
+
+[pinn]
+equation = "convection"
+beta = 50.0
+x_min = 0.0
+x_max = 6.283185307179586
+t_min = 0.0
+t_max = 1.0
+train_x = 201
+train_t = 201
+eval_x = 101
+eval_t = 101
+hidden_dim = 512
+num_layers = 4
+optimizer = "lbfgs"
+lbfgs_max_iter = 20
+lbfgs_history_size = 100
+tolerance_grad = 1.0e-8
+tolerance_change = 1.0e-10
+seed = 0
+eval_every = 50
+num_moduli = 15
+fastmode = false
+
+[pinn.stages.probe]
+steps = 150
+checkpoint_every = 150
+snapshot_steps = [0, 150]
+
+[pinn.stages.convergence]
+steps = 2000
+checkpoint_every = 500
+snapshot_steps = [0, 150, 500, 1000, 1500, 2000]
+
+# Six numerical backends are reported. MXFP8 and NVFP4 additionally have
+# serial and four-stream schedules in the 150-step performance probe.
+[pinn.variants]
+probe = [
+  "native_fp32",
+  "native_fp64",
+  "int8",
+  "fp8",
+  "mxfp8_serial",
+  "mxfp8_streams4",
+  "nvfp4_serial",
+  "nvfp4_streams4",
+]
+convergence = [
+  "native_fp32",
+  "native_fp64",
+  "int8",
+  "nvfp4_streams4",
+]
