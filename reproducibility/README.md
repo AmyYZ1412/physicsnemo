@@ -5,6 +5,9 @@ and Convection PINN experiments. It is a paper reproduction suite, not a
 generic PDE trainer. Every path and command in this document is relative to
 the root of this PhysicsNeMo Git repository.
 
+For a parameterized Convection PINN example for custom experiments, see
+`examples/cfd/convection_pinn/`.
+
 The fixed values live in
 `reproducibility/paper_config.toml`. GEMM programs are under
 `reproducibility/gemm/`, PINN programs are under `reproducibility/pinn/`, and

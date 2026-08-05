@@ -14,6 +14,7 @@ such models can help solve real world problems.
 |[Darcy Flow](./cfd/darcy_fno/)|Introductory example for learning basics of data-driven models on Physics-ML datasets|
 |[Darcy Flow (Data + Physics)](./cfd/darcy_physics_informed/)|Data-driven training with physics-based constraints|
 |[Lid Driven Cavity Flow](./cfd/ldc_pinns/)|Purely physics-driven (no external simulation/experimental data) training|
+|[Convection PINN](./cfd/convection_pinn/)|Configurable Convection PINN with selectable Ozaki backends|
 |[Vortex Shedding](./cfd/vortex_shedding_mgn/)|Introductory example for learning the basics of MeshGraphNets in PhysicsNeMo|
 |[Medium-range global weather forecast using FCN-AFNO](./weather/fcn_afno/)|Introductory example on training data-driven models for global weather forecasting (auto-regressive model)|
 |[Lagrangian Fluid Flow](./cfd/lagrangian_mgn/)|Introductory example for data-driven training on Lagrangian meshes|
