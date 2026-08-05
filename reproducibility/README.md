@@ -115,12 +115,16 @@ python reproducibility/pinn/run_pinn_150.py \
 python reproducibility/pinn/run_pinn_2000.py --device cuda:0
 ```
 
-Both PINN runners enable resume mode. The 2000-step entry launches exactly one
+The 2000-step entry enables resume mode and launches exactly one
 training process with a target of 2000 iterations. If a compatible latest or
 150-iteration checkpoint exists, training continues from it, including the
 L-BFGS optimizer history. If neither checkpoint exists, the same process trains
 continuously from iteration 0 through iteration 2000; it does not stop or
 restart at iteration 150.
+
+The 150-step entry always starts a fresh probe. If a completed 2000-step
+result already exists, it uses a separate `probe_150` directory so it cannot
+overwrite the convergence result.
 
 Each variant writes stage checkpoints, JSON/CSV summaries, and a cumulative
 `training_log.npz` under
@@ -131,7 +135,10 @@ when a run is continued to `checkpoint_2000.pt`; `checkpoint_latest.pt`
 supports recovery after an interruption. If the latest checkpoint is absent,
 the 2000-step trainer can fall back to the preserved 150-step checkpoint.
 Generated results are ignored by Git except for the directory's `.gitignore`
-file.
+file. If a 2000-step result already exists and the 150-step probe is run
+again, the probe is written under
+`reproducibility/results/pinn/<variant>/probe_150/` so the convergence result
+is preserved.
 
 ## Plot the 2000-step results
 
@@ -142,9 +149,9 @@ python reproducibility/pinn/plot_results.py
 ```
 
 It writes the comparison curves and the four-backend dynamics/snapshot figure
-under `reproducibility/results/pinn/`. Matplotlib is optional
-for training; if it is not already present in the environment, install it with
-`uv pip install matplotlib`.
+under `reproducibility/results/pinn/`. Matplotlib is installed by
+`reproducibility/setup_environment.sh` together with the training
+dependencies.
 
 ## Inspect commands without running
 
@@ -156,6 +163,6 @@ python reproducibility/pinn/run_pinn_150.py --dry-run
 python reproducibility/pinn/run_pinn_2000.py --dry-run
 ```
 
-These commands validate
-`reproducibility/paper_config.toml` and print the exact
-subprocesses without allocating GPU memory or starting training.
+These commands read
+`reproducibility/paper_config.toml` and print the exact subprocesses without
+allocating GPU memory or starting training.

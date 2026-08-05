@@ -5123,6 +5123,7 @@ dependencies = [
     { name = "hydra-core" },
     { name = "importlib-metadata" },
     { name = "jaxtyping" },
+    { name = "matplotlib" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-18-nvidia-physicsnemo-cu12' or (extra == 'extra-18-nvidia-physicsnemo-natten-cu12' and extra == 'extra-18-nvidia-physicsnemo-natten-cu13') or (extra == 'extra-18-nvidia-physicsnemo-transformer-engine-cu12' and extra == 'extra-18-nvidia-physicsnemo-transformer-engine-cu13')" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-18-nvidia-physicsnemo-cu13' or extra != 'extra-18-nvidia-physicsnemo-cu12' or (extra == 'extra-18-nvidia-physicsnemo-natten-cu12' and extra == 'extra-18-nvidia-physicsnemo-natten-cu13') or (extra == 'extra-18-nvidia-physicsnemo-transformer-engine-cu12' and extra == 'extra-18-nvidia-physicsnemo-transformer-engine-cu13')" },
     { name = "nvtx" },
@@ -5189,7 +5190,6 @@ gnns = [
     { name = "wandb" },
 ]
 mesh-extras = [
-    { name = "matplotlib" },
     { name = "pyvista" },
     { name = "vtk" },
 ]
@@ -5273,7 +5273,7 @@ requires-dist = [
     { name = "line-profiler", marker = "extra == 'model-extras'" },
     { name = "line-profiler", marker = "extra == 'nn-extras'" },
     { name = "line-profiler", marker = "extra == 'utils-extras'" },
-    { name = "matplotlib", marker = "extra == 'mesh-extras'", specifier = ">=3.10.8" },
+    { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "mlflow", marker = "extra == 'gnns'", specifier = ">=3.12.0" },
     { name = "mlflow", marker = "extra == 'model-extras'", specifier = ">=3.12.0" },
     { name = "mlflow", marker = "extra == 'nn-extras'", specifier = ">=3.12.0" },

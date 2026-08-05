@@ -54,6 +54,11 @@ def run_stage(stage: str) -> int:
     statuses = []
     for variant in variants:
         variant_dir = args.output_dir / variant
+        # A completed convergence run is immutable. A later probe must use a
+        # separate directory so its fresh 150-step checkpoint cannot replace
+        # the 2000-step result or the checkpoint used for resumption.
+        if stage == "probe" and (variant_dir / "checkpoint_2000.pt").exists():
+            variant_dir = variant_dir / "probe_150"
         command = [
             sys.executable,
             str(TRAINER),
@@ -65,8 +70,9 @@ def run_stage(stage: str) -> int:
             args.device,
             "--output-dir",
             str(variant_dir),
-            "--resume",
         ]
+        if stage == "convergence":
+            command.append("--resume")
         print(" ".join(command), flush=True)
         if args.dry_run:
             status = 0
